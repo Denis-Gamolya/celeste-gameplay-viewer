@@ -1,0 +1,223 @@
+<div id="celeste-gameplay-layout-__INSTANCE__">
+  <style>
+    #celeste-gameplay-layout-__INSTANCE__ .map-svg { display:block; width:100%; overflow:visible; }
+    #celeste-gameplay-layout-__INSTANCE__ .room-bg { fill:var(--muted); fill-opacity:.22; stroke:var(--border); stroke-width:1.5; }
+    #celeste-gameplay-layout-__INSTANCE__ .terrain { fill:var(--muted-foreground); fill-opacity:.62; }
+    #celeste-gameplay-layout-__INSTANCE__ .room-name { fill:var(--foreground); font-weight:500; paint-order:stroke; stroke:var(--background); stroke-width:4; stroke-linejoin:round; }
+    #celeste-gameplay-layout-__INSTANCE__ .spinner { fill:var(--purple); stroke:var(--background); stroke-width:1.4; }
+    #celeste-gameplay-layout-__INSTANCE__ .spawn { fill:var(--background); stroke:var(--foreground); stroke-width:2; }
+    #celeste-gameplay-layout-__INSTANCE__ .spawn-letter { fill:var(--foreground); font-size:8px; font-weight:500; text-anchor:middle; dominant-baseline:central; }
+    #celeste-gameplay-layout-__INSTANCE__ .berry { fill:var(--red); stroke:var(--background); stroke-width:1.5; }
+    #celeste-gameplay-layout-__INSTANCE__ .booster { fill:none; stroke:var(--blue); stroke-width:3; }
+    #celeste-gameplay-layout-__INSTANCE__ .booster.red { stroke:var(--red); }
+    #celeste-gameplay-layout-__INSTANCE__ .refill { fill:var(--green); stroke:var(--background); stroke-width:1.5; }
+    #celeste-gameplay-layout-__INSTANCE__ .cloud { fill:var(--blue); fill-opacity:.75; stroke:var(--background); stroke-width:1; }
+    #celeste-gameplay-layout-__INSTANCE__ .move-block { fill:var(--orange); fill-opacity:.45; stroke:var(--orange); stroke-width:2; }
+    #celeste-gameplay-layout-__INSTANCE__ .move-direction { fill:var(--foreground); font-size:13px; font-weight:500; text-anchor:middle; dominant-baseline:central; }
+    #celeste-gameplay-layout-__INSTANCE__ .jump-through { stroke:var(--orange); stroke-width:4; stroke-linecap:round; }
+    #celeste-gameplay-layout-__INSTANCE__ .badeline-path { fill:none; stroke:var(--purple); stroke-width:2.5; stroke-dasharray:5 4; }
+    #celeste-gameplay-layout-__INSTANCE__ .badeline { fill:var(--purple); stroke:var(--background); stroke-width:2; }
+    #celeste-gameplay-layout-__INSTANCE__ .badeline-node { fill:var(--background); stroke:var(--purple); stroke-width:2; }
+    #celeste-gameplay-layout-__INSTANCE__ .trigger { fill:var(--yellow); fill-opacity:.16; stroke:var(--yellow); stroke-width:2; stroke-dasharray:6 4; }
+    #celeste-gameplay-layout-__INSTANCE__ .legend { display:flex; flex-wrap:wrap; gap:8px 16px; margin:8px 0 0; }
+    #celeste-gameplay-layout-__INSTANCE__ .legend-item { display:inline-flex; align-items:center; gap:6px; white-space:nowrap; }
+    #celeste-gameplay-layout-__INSTANCE__ .legend-mark { width:12px; height:12px; display:inline-block; border:2px solid currentColor; }
+    #celeste-gameplay-layout-__INSTANCE__ .legend-solid { color:var(--muted-foreground); background:currentColor; }
+    #celeste-gameplay-layout-__INSTANCE__ .legend-spawn { color:var(--foreground); border-radius:50%; }
+    #celeste-gameplay-layout-__INSTANCE__ .legend-berry { color:var(--red); transform:rotate(45deg); background:currentColor; }
+    #celeste-gameplay-layout-__INSTANCE__ .legend-spinner { color:var(--purple); border-radius:50%; background:currentColor; }
+    #celeste-gameplay-layout-__INSTANCE__ .legend-booster { color:var(--blue); border-radius:50%; }
+    #celeste-gameplay-layout-__INSTANCE__ .legend-refill { color:var(--green); transform:rotate(45deg); background:currentColor; }
+    #celeste-gameplay-layout-__INSTANCE__ .legend-cloud { color:var(--blue); background:currentColor; border-radius:6px; }
+    #celeste-gameplay-layout-__INSTANCE__ .legend-block { color:var(--orange); background:currentColor; }
+    #celeste-gameplay-layout-__INSTANCE__ .legend-jump { color:var(--orange); border:0; border-top:4px solid currentColor; height:8px; }
+    #celeste-gameplay-layout-__INSTANCE__ .legend-trigger { color:var(--yellow); border-style:dashed; }
+  </style>
+  <div class="viz-controls">
+    <label class="form-label">View
+      <select class="form-select" id="gameplay-room-view-__INSTANCE__">
+        <option value="all">All rooms</option>
+      </select>
+    </label>
+  </div>
+  <svg class="map-svg" role="img" aria-labelledby="gameplay-map-title-__INSTANCE__ gameplay-map-description-__INSTANCE__">
+    <title id="gameplay-map-title-__INSTANCE__">Gameplay layout</title>
+    <desc id="gameplay-map-description-__INSTANCE__">Rooms, solid tiles, gameplay objects, and triggers at their map coordinates.</desc>
+  </svg>
+  <div class="legend text-small" aria-label="Map legend">
+    <span class="legend-item"><i class="legend-mark legend-solid"></i>Solid tile</span>
+    <span class="legend-item"><i class="legend-mark legend-spawn"></i>Spawn</span>
+    <span class="legend-item"><i class="legend-mark legend-berry"></i>Strawberry</span>
+    <span class="legend-item"><i class="legend-mark legend-spinner"></i>Spinner hazard</span>
+    <span class="legend-item"><i class="legend-mark legend-booster"></i>Booster (red or blue)</span>
+    <span class="legend-item"><i class="legend-mark legend-refill"></i>Dash refill</span>
+    <span class="legend-item"><i class="legend-mark legend-cloud"></i>Cloud</span>
+    <span class="legend-item"><i class="legend-mark legend-block"></i>Move block</span>
+    <span class="legend-item"><i class="legend-mark legend-jump"></i>Jump-through</span>
+    <span class="legend-item"><i class="legend-mark legend-trigger"></i>Trigger region</span>
+    <span class="legend-item">? · Other entity / unverified trigger</span>
+    <span class="legend-item">Purple dashed line · Badeline boost path</span>
+  </div>
+  <div class="text-small tabular-nums" id="gameplay-room-summary-__INSTANCE__" aria-live="polite"></div>
+  <div class="text-small text-muted" id="gameplay-warnings-__INSTANCE__"></div>
+  <script>
+  (() => {
+    const mapData = __GAMEPLAY_DATA__;
+    const root = document.getElementById('celeste-gameplay-layout-__INSTANCE__');
+    const svg = root.querySelector('.map-svg');
+    const choice = root.querySelector('#gameplay-room-view-__INSTANCE__');
+    const summary = root.querySelector('#gameplay-room-summary-__INSTANCE__');
+    const ns = 'http://www.w3.org/2000/svg';
+    const rooms = mapData.rooms;
+    const warnings = root.querySelector('#gameplay-warnings-__INSTANCE__');
+    warnings.textContent = mapData.warnings.join(' · ');
+    rooms.forEach((room,index) => {
+      const option = document.createElement('option');
+      option.value = String(index);
+      option.textContent = room.name;
+      choice.append(option);
+    });
+    const label = {
+      player:'Spawn', strawberry:'Strawberry', spinner:'Spinner hazard',
+      booster:'Booster', cloud:'Cloud platform', refill:'Dash refill',
+      moveBlock:'Move block', jumpThru:'Jump-through platform',
+      badelineBoost:'Badeline boost'
+    };
+    const make = (tag, attrs = {}, text) => {
+      const node = document.createElementNS(ns, tag);
+      for (const [name, value] of Object.entries(attrs)) node.setAttribute(name, value);
+      if (text !== undefined) node.textContent = text;
+      return node;
+    };
+    const tooltip = (node, text) => {
+      node.append(make('title', {}, text));
+      return node;
+    };
+    function drawEntity(group, room, entity) {
+      const x = room.x + entity.x;
+      const y = room.y + entity.y;
+      const where = `${room.name} · (${entity.x}, ${entity.y})`;
+      const detail = entity.type === 'booster' ? (entity.red ? 'Red booster' : 'Blue booster') :
+        entity.type === 'refill' ? (entity.twoDash ? 'Two-dash refill' : 'Dash refill') :
+        label[entity.type] || entity.type;
+      const entityGroup = make('g', {});
+      if (entity.type === 'spinner') {
+        entityGroup.append(make('circle', {cx:x, cy:y, r:5, class:'spinner'}));
+      } else if (entity.type === 'player') {
+        entityGroup.append(make('circle', {cx:x, cy:y, r:8, class:'spawn'}));
+        entityGroup.append(make('text', {x, y, class:'spawn-letter'}, 'S'));
+      } else if (entity.type === 'strawberry') {
+        entityGroup.append(make('path', {d:`M ${x} ${y-9} L ${x+8} ${y} L ${x} ${y+9} L ${x-8} ${y} Z`, class:'berry'}));
+      } else if (entity.type === 'booster') {
+        entityGroup.append(make('circle', {cx:x, cy:y, r:9, class:entity.red ? 'booster red' : 'booster'}));
+      } else if (entity.type === 'refill') {
+        entityGroup.append(make('path', {d:`M ${x} ${y-8} L ${x+7} ${y} L ${x} ${y+8} L ${x-7} ${y} Z`, class:'refill'}));
+        if (entity.twoDash) entityGroup.append(make('circle', {cx:x, cy:y, r:2, fill:'var(--background)'}));
+      } else if (entity.type === 'cloud') {
+        entityGroup.append(make('rect', {x:x-16, y:y-5, width:32, height:10, rx:5, class:'cloud'}));
+      } else if (entity.type === 'moveBlock') {
+        entityGroup.append(make('rect', {x, y, width:entity.w, height:entity.h, class:'move-block'}));
+        entityGroup.append(make('text', {x:x+entity.w/2, y:y+entity.h/2, class:'move-direction'}, ({Left:'←',Right:'→',Up:'↑',Down:'↓'})[entity.direction] || '?'));
+      } else if (entity.type === 'jumpThru') {
+        entityGroup.append(make('line', {x1:x, y1:y, x2:x+entity.w, y2:y, class:'jump-through'}));
+      } else if (entity.type === 'badelineBoost') {
+        const points = [[entity.x,entity.y],...entity.nodes].map(([nx,ny])=>`${room.x+nx},${room.y+ny}`).join(' ');
+        entityGroup.append(make('polyline', {points, class:'badeline-path'}));
+        entityGroup.append(make('circle', {cx:x, cy:y, r:9, class:'badeline'}));
+        for (const [nx, ny] of entity.nodes) entityGroup.append(make('circle', {cx:room.x+nx, cy:room.y+ny, r:5, class:'badeline-node'}));
+      } else {
+        entityGroup.append(make('rect', {x:entity.w ? x : x-6,y:entity.h ? y : y-6,width:entity.w || 12,height:entity.h || 12,fill:'none',stroke:'var(--foreground)','stroke-width':2}));
+        entityGroup.append(make('text', {x:x+entity.w/2,y:y+entity.h/2,class:'spawn-letter'},'?'));
+        if (entity.nodes.length) {
+          const points = [[entity.x,entity.y],...entity.nodes].map(([nx,ny])=>`${room.x+nx},${room.y+ny}`).join(' ');
+          entityGroup.append(make('polyline', {points,class:'badeline-path'}));
+        }
+      }
+      tooltip(entityGroup, `${detail} · ${where} · ${JSON.stringify(entity.properties)}`);
+      group.append(entityGroup);
+    }
+    function drawRoom(room) {
+      const group = make('g', {});
+      group.append(make('rect', {x:room.x,y:room.y,width:room.w,height:room.h,class:'room-bg'}));
+      for (let rowIndex=0;rowIndex<room.tiles.length;rowIndex++) {
+        const row = room.tiles[rowIndex];
+        let start = -1;
+        for (let column=0;column<=row.length;column++) {
+          const solid = column<row.length && row[column] !== '0' && row[column] !== ' ';
+          if (solid && start<0) start=column;
+          if (!solid && start>=0) {
+            group.append(make('rect', {
+              x:room.x+start*8,y:room.y+rowIndex*8,
+              width:(column-start)*8,height:8,class:'terrain'
+            }));
+            start=-1;
+          }
+        }
+      }
+      for (const trigger of room.triggers) {
+        group.append(tooltip(make('rect', {
+          x:room.x+trigger.x,y:room.y+trigger.y,
+          width:trigger.w,height:trigger.h,class:'trigger'
+        }), `${trigger.type} · ${room.name} · (${trigger.x}, ${trigger.y})`));
+        if (!trigger.verified) group.append(make('text', {x:room.x+trigger.x+8,y:room.y+trigger.y+12,class:'room-name'},'?'));
+      }
+      for (const entity of room.entities) drawEntity(group,room,entity);
+      group.append(make('text', {x:room.x+8,y:room.y-7,class:'room-name text-small'},room.name));
+      return group;
+    }
+    function boundsFor(selectedRooms) {
+      const points = [];
+      for (const room of selectedRooms) {
+        points.push([room.x,room.y],[room.x+room.w,room.y+room.h]);
+        for (const entity of [...room.entities,...room.triggers]) {
+          points.push([room.x+entity.x,room.y+entity.y],[room.x+entity.x+entity.w,room.y+entity.y+entity.h]);
+          for (const [x,y] of entity.nodes || []) points.push([room.x+x,room.y+y]);
+        }
+      }
+      const xs=points.map(point=>point[0]);
+      const ys=points.map(point=>point[1]);
+      const left=Math.min(...xs)-24;
+      const top=Math.min(...ys)-32;
+      return {x:left,y:top,w:Math.max(...xs)+24-left,h:Math.max(...ys)+24-top};
+    }
+    function render() {
+      const selected = choice.value;
+      const room = selected === 'all' ? null : rooms[Number(selected)];
+      const shownRooms = room ? [room] : rooms;
+      const bounds = boundsFor(shownRooms);
+      const width = root.getBoundingClientRect().width || 736;
+      const height = width * bounds.h / bounds.w;
+      svg.setAttribute('viewBox', `${bounds.x} ${bounds.y} ${bounds.w} ${bounds.h}`);
+      svg.setAttribute('height', `${height}`);
+      svg.replaceChildren(
+        make('title',{id:'gameplay-map-title-__INSTANCE__'},`${mapData.title} gameplay layout`),
+        make('desc',{id:'gameplay-map-description-__INSTANCE__'},'Solid tiles, spawns, gameplay entities, movement nodes, and trigger regions.'),
+        ...shownRooms.map(drawRoom)
+      );
+      const entities = shownRooms.flatMap(item=>item.entities);
+      const count = type => entities.filter(entity=>entity.type===type).length;
+      const triggerCount = shownRooms.reduce((total,item)=>total+item.triggers.length,0);
+      const heading = room ? `${room.name} · ${room.w} × ${room.h} px` : `${rooms.length} rooms`;
+      summary.textContent = `${heading} · ${count('player')} spawns · ${count('strawberry')} strawberries · ${count('spinner')} spinners · ${triggerCount} trigger regions`;
+      // Labels retain screen readability while spatial marks keep map scale.
+      const textScale = bounds.w / width;
+      svg.querySelectorAll('.room-name').forEach(node=>node.style.fontSize=`${12*textScale}px`);
+    }
+    choice.addEventListener('change', () => {
+      render();
+      window.openai?.setWidgetState?.({modelContent:{view:choice.value},privateContent:null}).catch(()=>{});
+    });
+    const prior = window.openai?.widgetState?.modelContent?.view;
+    if (prior === 'all' || /^\d+$/.test(prior) && Number(prior)<rooms.length) choice.value=prior;
+    window.addEventListener('openai:set_globals', event=>{
+      const view=event.detail?.globals?.widgetState?.modelContent?.view;
+      if (view === 'all' || /^\d+$/.test(view) && Number(view)<rooms.length) {
+        choice.value=view;
+        render();
+      }
+    });
+    new ResizeObserver(render).observe(root);
+    render();
+  })();
+  </script>
+</div>

@@ -1,0 +1,3 @@
+loenn-mcp==5.2.0
+fastmcp==3.4.7
+Pillow==12.3.0

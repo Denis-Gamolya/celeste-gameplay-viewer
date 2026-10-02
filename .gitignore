@@ -1,0 +1,10 @@
+.venv/
+.install-test/
+__pycache__/
+*.py[cod]
+assets/sprites/*.png
+assets/sprites/manifest.json
+outputs/
+previews/
+dist/
+.pytest_cache/
