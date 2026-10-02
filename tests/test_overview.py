@@ -9,9 +9,9 @@ from unittest.mock import patch
 
 from PIL import Image
 
-from overview import analyze_boundaries, make_overview_result
-from overview import render_overview, resolve_overview_source
-from overview import styled_edges
+from celeste_gameplay_viewer.overview import analyze_boundaries, make_overview_result
+from celeste_gameplay_viewer.overview import render_overview, resolve_overview_source
+from celeste_gameplay_viewer.overview import styled_edges
 
 
 def room(name, x=0, y=0, tiles=None):
@@ -141,8 +141,8 @@ class OverviewTests(unittest.TestCase):
             source = maps / "sample.bin"
             source.write_bytes(b"source fixture")
             layout = {"title": "Fixture", "rooms": [room("sample")]}
-            with patch("overview.cb.read_map"), patch(
-                "overview.extract_layout", return_value=layout
+            with patch("celeste_gameplay_viewer.overview.cb.read_map"), patch(
+                "celeste_gameplay_viewer.overview.extract_layout", return_value=layout
             ):
                 result = make_overview_result(root)
             self.assertEqual([block.type for block in result.content],

@@ -8,9 +8,9 @@ from unittest.mock import patch
 
 from fastmcp import Client
 
-from mcp_app import RESOURCE_MIME, RESOURCE_URI, make_app_resource
-from mcp_app import render_interactive_map
-from server import mcp
+from celeste_gameplay_viewer.mcp_app import RESOURCE_MIME, RESOURCE_URI, make_app_resource
+from celeste_gameplay_viewer.mcp_app import render_interactive_map
+from celeste_gameplay_viewer.server import mcp
 
 
 class AppTests(unittest.TestCase):
@@ -32,7 +32,7 @@ class AppTests(unittest.TestCase):
             manifest = {"gallery_data_path": str(payload_path),
                         "map_sha256": "a" * 64, "room_count": 1,
                         "page_count": 2, "html_path": "index.html"}
-            with patch("mcp_app.render_room_gallery", return_value=manifest):
+            with patch("celeste_gameplay_viewer.mcp_app.render_room_gallery", return_value=manifest):
                 result = render_interactive_map(Path(temporary), Path(temporary))
             self.assertEqual(result.meta["celesteGallery"], payload)
             self.assertEqual(result.structured_content, manifest)

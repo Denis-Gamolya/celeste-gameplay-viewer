@@ -47,8 +47,8 @@ Optional separate loenn-mcp server ──edit──> Celeste mod Maps/*.bin
 
 This text diagram is version controlled, readable in terminals, and explains
 the runtime boundary without depending on a diagram renderer. The source
-layout stays flat to match the existing small Python project and FastMCP's
-documented `server.py` stdio entry-point pattern.
+uses one importable Python package, while `run_server.py` is the small stdio
+entry point Codex launches.
 
 ## Using the viewer
 
@@ -65,9 +65,20 @@ test. For a local test without changing Codex configuration, pass
 
 ## Development
 
-The source files and HTML assets are the viewer. `tools/extract_sprites.py`
-decodes selected frames from an installed Celeste atlas; generated PNGs and
-their manifest are ignored by Git. Never commit those generated files.
+The repository keeps runtime code together and separates development tools:
+
+```text
+celeste_gameplay_viewer/  Python modules and HTML/JS preview assets
+tests/                    Automated viewer and browser checks
+tools/                    Sprite extraction and install verification
+run_server.py             Small Codex stdio entry point
+install.ps1               Windows installer
+requirements.txt          Separately installed PyPI dependencies
+```
+
+`tools/extract_sprites.py` decodes selected frames from an installed Celeste
+atlas; generated PNGs and their manifest are ignored by Git. Never commit
+those generated files.
 
 After installing dependencies in a local virtual environment, run:
 
@@ -75,10 +86,12 @@ After installing dependencies in a local virtual environment, run:
 python -m unittest discover -s tests -p 'test_*.py' -q
 ```
 
-The structure and installer follow the [Python Packaging User Guide](https://packaging.python.org/en/latest/flow/)
-for isolated environments and the official [FastMCP quickstart](https://github.com/PrefectHQ/fastmcp/blob/main/docs/getting-started/quickstart.mdx)
-for a stdio server. The maintained [FastMCP repository](https://github.com/PrefectHQ/fastmcp)
-is the reference example for this small source-and-tests layout. Codex stores
+The package-at-root layout follows the [Python Packaging User Guide's flat-layout convention](https://packaging.python.org/en/latest/discussions/src-layout-vs-flat-layout/).
+It keeps the existing script-based installer simple; a `src/` layout would
+require an extra package installation step. The stdio entry point follows the
+official [FastMCP quickstart](https://github.com/PrefectHQ/fastmcp/blob/main/docs/getting-started/quickstart.mdx)
+and the maintained [FastMCP repository](https://github.com/PrefectHQ/fastmcp)
+is the reference example. Codex stores
 MCP registrations in `~/.codex/config.toml`; the installer uses `codex mcp add`
 and preserves a backup before changing that file.
 

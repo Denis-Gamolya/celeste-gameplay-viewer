@@ -83,30 +83,38 @@ if ([int] $versionParts[0] -ne 3 -or [int] $versionParts[1] -lt 10) {
 }
 
 New-Item -ItemType Directory -Path $installRoot -Force | Out-Null
-New-Item -ItemType Directory -Path (Join-Path $installRoot 'assets'), `
-    (Join-Path $installRoot 'assets\sprites'), `
+$packageRoot = Join-Path $sourceRoot 'celeste_gameplay_viewer'
+$installedPackage = Join-Path $installRoot 'celeste_gameplay_viewer'
+New-Item -ItemType Directory -Path $installedPackage, `
+    (Join-Path $installedPackage 'assets'), `
+    (Join-Path $installedPackage 'assets\sprites'), `
     (Join-Path $installRoot 'tools'), `
     (Join-Path $installRoot 'previews') -Force | Out-Null
 
 # Copy an explicit allowlist so a local checkout cannot install upstream code
 # or previously extracted game artwork by accident.
 $pythonFiles = @(
-    'findings.py', 'mcp_app.py', 'overview.py', 'progression.py', 'raster.py',
+    '__init__.py', 'findings.py', 'mcp_app.py', 'overview.py',
+    'progression.py', 'raster.py',
     'room_gallery.py', 'room_view.py', 'server.py', 'sprites.py',
-    'transport_probe.py', 'viewer.py', 'verify_install.py'
+    'transport_probe.py', 'viewer.py'
 )
 foreach ($name in $pythonFiles) {
-    Copy-Item -LiteralPath (Join-Path $sourceRoot $name) `
-        -Destination (Join-Path $installRoot $name) -Force
+    Copy-Item -LiteralPath (Join-Path $packageRoot $name) `
+        -Destination (Join-Path $installedPackage $name) -Force
 }
+Copy-Item -LiteralPath (Join-Path $sourceRoot 'run_server.py') `
+    -Destination (Join-Path $installRoot 'run_server.py') -Force
 Copy-Item -LiteralPath (Join-Path $sourceRoot 'requirements.txt') `
     -Destination (Join-Path $installRoot 'requirements.txt') -Force
 Copy-Item -LiteralPath (Join-Path $sourceRoot 'tools\extract_sprites.py') `
     -Destination (Join-Path $installRoot 'tools\extract_sprites.py') -Force
+Copy-Item -LiteralPath (Join-Path $sourceRoot 'tools\verify_install.py') `
+    -Destination (Join-Path $installRoot 'tools\verify_install.py') -Force
 foreach ($name in @('layout.html', 'mcp-app-bridge.js', 'room-gallery.html',
                     'standalone.html')) {
-    Copy-Item -LiteralPath (Join-Path $sourceRoot ('assets\' + $name)) `
-        -Destination (Join-Path $installRoot 'assets' $name) -Force
+    Copy-Item -LiteralPath (Join-Path $packageRoot ('assets\' + $name)) `
+        -Destination (Join-Path $installedPackage 'assets' $name) -Force
 }
 
 $venvPython = Join-Path $installRoot '.venv\Scripts\python.exe'
@@ -120,13 +128,13 @@ Assert-CommandSucceeded 'Dependency installation'
 
 & $venvPython (Join-Path $installRoot 'tools\extract_sprites.py') `
     --celeste-path $celesteRoot `
-    --output-dir (Join-Path $installRoot 'assets\sprites')
+    --output-dir (Join-Path $installedPackage 'assets\sprites')
 Assert-CommandSucceeded 'Local sprite extraction'
 
 $env:LOENN_MCP_WORKSPACE = $modRoot
 $env:CELESTE_VIEWER_OUTPUT = Join-Path $installRoot 'previews'
 $env:PYTHONUTF8 = '1'
-& $venvPython (Join-Path $installRoot 'verify_install.py')
+& $venvPython (Join-Path $installRoot 'tools\verify_install.py')
 Assert-CommandSucceeded 'Read-only viewer smoke test'
 
 if (-not $SkipCodexRegistration) {
@@ -157,7 +165,7 @@ if (-not $SkipCodexRegistration) {
         --env "LOENN_MCP_WORKSPACE=$modRoot" `
         --env "CELESTE_VIEWER_OUTPUT=$env:CELESTE_VIEWER_OUTPUT" `
         --env 'PYTHONUTF8=1' `
-        -- $venvPython (Join-Path $installRoot 'server.py')
+        -- $venvPython (Join-Path $installRoot 'run_server.py')
     Assert-CommandSucceeded 'Codex MCP registration'
     $registered = & $codex.Source mcp list --json | ConvertFrom-Json
     Assert-CommandSucceeded 'Codex MCP verification'

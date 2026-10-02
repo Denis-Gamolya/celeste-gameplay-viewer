@@ -6,8 +6,8 @@ from pathlib import Path
 from fastmcp.tools import ToolResult
 from mcp.types import TextContent
 
-from room_gallery import ASSETS, make_gallery_fragment, render_room_gallery
-from room_gallery import wrap_gallery
+from .room_gallery import ASSETS, make_gallery_fragment, render_room_gallery
+from .room_gallery import wrap_gallery
 
 RESOURCE_URI = "ui://celeste/room-browser-v2.html"
 RESOURCE_MIME = "text/html;profile=mcp-app"

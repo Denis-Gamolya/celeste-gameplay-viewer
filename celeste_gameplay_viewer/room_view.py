@@ -15,10 +15,10 @@ from fastmcp.tools import ToolResult
 from mcp.types import ImageContent, TextContent
 from PIL import ImageFont
 
-from overview import COLORS, analyze_boundaries, resolve_overview_source, styled_edges
-from raster import RasterCanvas
-from sprites import load_sprite, object_sprite, spike_sprites
-from viewer import cb, extract_layout
+from .overview import COLORS, analyze_boundaries, resolve_overview_source, styled_edges
+from .raster import RasterCanvas
+from .sprites import load_sprite, object_sprite, spike_sprites
+from .viewer import cb, extract_layout
 
 DECORATIVE = {"lamp", "wire", "lightbeam", "flutterbird", "memorialTextController"}
 VISUAL_TRIGGERS = {

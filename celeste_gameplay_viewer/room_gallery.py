@@ -9,10 +9,10 @@ from uuid import uuid4
 
 from PIL import Image
 
-from overview import render_overview, resolve_overview_source
-from progression import order_rooms
-from room_view import render_room
-from viewer import cb, extract_layout
+from .overview import render_overview, resolve_overview_source
+from .progression import order_rooms
+from .room_view import render_room
+from .viewer import cb, extract_layout
 
 ASSETS = Path(__file__).parent / "assets"
 

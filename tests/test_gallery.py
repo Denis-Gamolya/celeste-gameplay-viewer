@@ -9,11 +9,11 @@ import unittest
 from unittest.mock import patch
 from PIL import Image, ImageChops
 
-from overview import render_overview
-from room_gallery import make_gallery_fragment, render_room_gallery
-from sprites import object_sprite, spike_sprites
+from celeste_gameplay_viewer.overview import render_overview
+from celeste_gameplay_viewer.room_gallery import make_gallery_fragment, render_room_gallery
+from celeste_gameplay_viewer.sprites import object_sprite, spike_sprites
 from test_room_view import sample_map
-from viewer import extract_layout
+from celeste_gameplay_viewer.viewer import extract_layout
 
 
 class GalleryTests(unittest.TestCase):
@@ -48,7 +48,7 @@ class GalleryTests(unittest.TestCase):
             (workspace / "Maps").mkdir(parents=True)
             source = workspace / "Maps/test.bin"
             source.write_bytes(b"unchanged")
-            with patch("room_gallery.cb.read_map", return_value=sample_map()):
+            with patch("celeste_gameplay_viewer.room_gallery.cb.read_map", return_value=sample_map()):
                 first = render_room_gallery(workspace, root / "output")
                 second = render_room_gallery(workspace, root / "output")
                 with self.assertRaises(ValueError):

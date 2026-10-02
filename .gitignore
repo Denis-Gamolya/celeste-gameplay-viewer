@@ -2,8 +2,8 @@
 .install-test/
 __pycache__/
 *.py[cod]
-assets/sprites/*.png
-assets/sprites/manifest.json
+celeste_gameplay_viewer/assets/sprites/*.png
+celeste_gameplay_viewer/assets/sprites/manifest.json
 outputs/
 previews/
 dist/

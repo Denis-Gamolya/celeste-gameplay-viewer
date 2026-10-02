@@ -5,10 +5,10 @@ import hashlib
 from itertools import combinations
 from pathlib import Path
 
-from overview import analyze_boundaries, resolve_overview_source
-from room_view import DECORATIVE, GAMEPLAY_TRIGGERS, LEGEND
-from room_view import VISUAL_TRIGGERS, symbol_kind
-from viewer import cb, children, extract_layout
+from .overview import analyze_boundaries, resolve_overview_source
+from .room_view import DECORATIVE, GAMEPLAY_TRIGGERS, LEGEND
+from .room_view import VISUAL_TRIGGERS, symbol_kind
+from .viewer import cb, children, extract_layout
 
 LOENN = "https://github.com/CelestialCartographers/Loenn/blob/master/src/"
 NODE_RULES = {

@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-import viewer
+from celeste_gameplay_viewer import viewer
 
 
 def make_map(tiles="\n1"):

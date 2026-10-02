@@ -7,8 +7,8 @@ import unittest
 from fastmcp import Client
 from PIL import Image
 
-from server import mcp
-from transport_probe import make_image_probe
+from celeste_gameplay_viewer.server import mcp
+from celeste_gameplay_viewer.transport_probe import make_image_probe
 
 
 class ProbeTests(unittest.TestCase):

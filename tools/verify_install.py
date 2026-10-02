@@ -13,7 +13,7 @@ from fastmcp.client.transports import StdioTransport
 
 async def verify() -> None:
     """Check discovery, the browser resource, and a read-only map preview."""
-    root = Path(__file__).resolve().parent
+    root = Path(__file__).resolve().parents[1]
     workspace = Path(os.environ["LOENN_MCP_WORKSPACE"]).resolve(strict=True)
     maps = sorted((workspace / "Maps").rglob("*.bin"))
     if not maps:
@@ -23,7 +23,7 @@ async def verify() -> None:
     source_hash = hashlib.sha256(map_file.read_bytes()).hexdigest()
     transport = StdioTransport(
         command=sys.executable,
-        args=[str(root / "server.py")],
+        args=[str(root / "run_server.py")],
         env=dict(os.environ),
         cwd=str(root),
     )

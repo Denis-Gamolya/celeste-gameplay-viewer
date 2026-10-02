@@ -7,14 +7,14 @@ from typing import Literal
 from fastmcp import FastMCP
 from fastmcp.tools import ToolResult
 
-from transport_probe import make_image_probe
-from overview import make_overview_result
-from room_view import make_room_result
-from room_gallery import render_room_gallery
-from viewer import render_map
-from findings import inspect_gameplay_map as inspect_map
-from mcp_app import RESOURCE_MIME, RESOURCE_URI, RESULT_SCHEMA, make_app_resource
-from mcp_app import render_interactive_map as render_app
+from .transport_probe import make_image_probe
+from .overview import make_overview_result
+from .room_view import make_room_result
+from .room_gallery import render_room_gallery
+from .viewer import render_map
+from .findings import inspect_gameplay_map as inspect_map
+from .mcp_app import RESOURCE_MIME, RESOURCE_URI, RESULT_SCHEMA, make_app_resource
+from .mcp_app import render_interactive_map as render_app
 
 mcp = FastMCP(
     "celeste-gameplay-viewer",

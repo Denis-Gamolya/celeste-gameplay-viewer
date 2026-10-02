@@ -10,7 +10,7 @@ from pathlib import Path
 import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from room_gallery import make_gallery_fragment, wrap_gallery
+from celeste_gameplay_viewer.room_gallery import make_gallery_fragment, wrap_gallery
 
 
 def prepare(snapshot: Path, output: Path) -> None:

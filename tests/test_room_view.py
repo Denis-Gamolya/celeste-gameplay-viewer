@@ -6,9 +6,9 @@ from unittest.mock import patch
 
 from PIL import Image
 
-from room_view import node_points, render_room, select_room, spike_triangles
-from viewer import extract_layout
-from raster import RasterCanvas
+from celeste_gameplay_viewer.room_view import node_points, render_room, select_room, spike_triangles
+from celeste_gameplay_viewer.viewer import extract_layout
+from celeste_gameplay_viewer.raster import RasterCanvas
 
 
 def sample_map():

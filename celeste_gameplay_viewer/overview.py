@@ -16,10 +16,10 @@ from fastmcp.tools import ToolResult
 from mcp.types import ImageContent, TextContent
 from PIL import ImageFont
 
-from raster import RasterCanvas
-from sprites import load_sprite, object_sprite
+from .raster import RasterCanvas
+from .sprites import load_sprite, object_sprite
 
-from viewer import cb, extract_layout, resolve_map
+from .viewer import cb, extract_layout, resolve_map
 
 OPPOSITE = {"left": "right", "right": "left",
             "top": "bottom", "bottom": "top"}
@@ -203,7 +203,7 @@ def render_overview(layout: dict, source_hash: str) -> tuple[bytes, dict]:
     regional crops are generated; individual rooms have a separate tool.
     """
     # Import at call time because room previews also reuse overview boundaries.
-    from room_view import DECORATIVE, LEGEND, symbol_kind
+    from .room_view import DECORATIVE, LEGEND, symbol_kind
 
     rooms = layout["rooms"]
     if not rooms:

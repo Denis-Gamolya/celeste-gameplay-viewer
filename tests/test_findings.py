@@ -6,9 +6,9 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from findings import inspect_gameplay_map, inspect_map_data
+from celeste_gameplay_viewer.findings import inspect_gameplay_map, inspect_map_data
 from test_room_view import sample_map
-from viewer import cb, children
+from celeste_gameplay_viewer.viewer import cb, children
 
 
 class FindingsTests(unittest.TestCase):
@@ -107,12 +107,12 @@ class FindingsTests(unittest.TestCase):
             (workspace / "Maps").mkdir()
             path = workspace / "Maps/test.bin"
             path.write_bytes(b"fixture")
-            with patch("findings.cb.read_map", return_value=sample_map()):
+            with patch("celeste_gameplay_viewer.findings.cb.read_map", return_value=sample_map()):
                 report = inspect_gameplay_map(workspace)
             self.assertEqual(report["source"], str(path))
             self.assertEqual(path.read_bytes(), b"fixture")
             self.assertEqual(list(workspace.rglob("*.*")), [path])
-            with patch("findings.cb.read_map", return_value=sample_map()), patch(
+            with patch("celeste_gameplay_viewer.findings.cb.read_map", return_value=sample_map()), patch(
                     "pathlib.Path.read_bytes", side_effect=[b"before", b"after"]):
                 with self.assertRaisesRegex(RuntimeError, "changed"):
                     inspect_gameplay_map(workspace)

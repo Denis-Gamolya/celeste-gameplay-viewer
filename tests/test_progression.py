@@ -2,8 +2,8 @@
 
 import unittest
 
-from progression import CITY_A_ORDER, order_rooms
-from room_gallery import make_gallery_fragment
+from celeste_gameplay_viewer.progression import CITY_A_ORDER, order_rooms
+from celeste_gameplay_viewer.room_gallery import make_gallery_fragment
 
 
 class ProgressionTests(unittest.TestCase):
