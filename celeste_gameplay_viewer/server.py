@@ -7,14 +7,19 @@ from typing import Literal
 from fastmcp import FastMCP
 from fastmcp.tools import ToolResult
 
-from .transport_probe import make_image_probe
-from .overview import make_overview_result
-from .room_view import make_room_result
-from .room_gallery import render_room_gallery
-from .viewer import render_map
 from .findings import inspect_gameplay_map as inspect_map
-from .mcp_app import RESOURCE_MIME, RESOURCE_URI, RESULT_SCHEMA, make_app_resource
+from .mcp_app import (
+    RESOURCE_MIME,
+    RESOURCE_URI,
+    RESULT_SCHEMA,
+    make_app_resource,
+)
 from .mcp_app import render_interactive_map as render_app
+from .overview import make_overview_result
+from .room_gallery import render_room_gallery
+from .room_view import make_room_result
+from .transport_probe import make_image_probe
+from .viewer import render_map
 
 mcp = FastMCP(
     "celeste-gameplay-viewer",
@@ -34,10 +39,14 @@ mcp = FastMCP(
 )
 
 
-@mcp.tool(annotations={
-    "readOnlyHint": False, "destructiveHint": False,
-    "idempotentHint": False, "openWorldHint": False,
-})
+@mcp.tool(
+    annotations={
+        "readOnlyHint": False,
+        "destructiveHint": False,
+        "idempotentHint": False,
+        "openWorldHint": False,
+    }
+)
 def render_gameplay_layout(map_path: str = "") -> dict:
     """Render the latest Celeste map as a gameplay diagram with room zoom.
 
@@ -58,10 +67,14 @@ def render_gameplay_layout(map_path: str = "") -> dict:
     return render_map(workspace, output_dir, map_path)
 
 
-@mcp.tool(annotations={
-    "readOnlyHint": True, "destructiveHint": False,
-    "idempotentHint": True, "openWorldHint": False,
-})
+@mcp.tool(
+    annotations={
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": False,
+    }
+)
 def test_image_delivery() -> ToolResult:
     """Return text and a tiny PNG to test whether chat displays MCP images.
 
@@ -73,12 +86,17 @@ def test_image_delivery() -> ToolResult:
     return make_image_probe()
 
 
-@mcp.tool(annotations={
-    "readOnlyHint": True, "destructiveHint": False,
-    "idempotentHint": True, "openWorldHint": False,
-})
+@mcp.tool(
+    annotations={
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": False,
+    }
+)
 def render_map_overview(
-    map_path: str = "", source: Literal["mod", "vanilla"] = "mod",
+    map_path: str = "",
+    source: Literal["mod", "vanilla"] = "mod",
 ) -> ToolResult:
     """Return one high-resolution dark whole-map PNG as image content.
 
@@ -94,16 +112,23 @@ def render_map_overview(
         source: mod or vanilla; vanilla reads only Content/Maps in the same
             Celeste installation.
     """
-    return make_overview_result(Path(os.environ["LOENN_MCP_WORKSPACE"]),
-                                map_path, source)
+    return make_overview_result(
+        Path(os.environ["LOENN_MCP_WORKSPACE"]), map_path, source
+    )
 
 
-@mcp.tool(annotations={
-    "readOnlyHint": True, "destructiveHint": False,
-    "idempotentHint": True, "openWorldHint": False,
-})
+@mcp.tool(
+    annotations={
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": False,
+    }
+)
 def render_room_preview(
-    room_name: str, map_path: str = "", source: Literal["mod", "vanilla"] = "mod",
+    room_name: str,
+    map_path: str = "",
+    source: Literal["mod", "vanilla"] = "mod",
 ) -> ToolResult:
     """Show one room's tiles, gameplay objects, saved nodes, and triggers as PNG.
 
@@ -114,31 +139,47 @@ def render_room_preview(
     remain numbered and labeled. Symbols are schematic, not precise hitboxes.
     Returns image content, full object metadata, and source hash. No writes.
     """
-    return make_room_result(Path(os.environ["LOENN_MCP_WORKSPACE"]),
-                            room_name, map_path, source)
+    return make_room_result(
+        Path(os.environ["LOENN_MCP_WORKSPACE"]), room_name, map_path, source
+    )
 
 
-@mcp.tool(annotations={
-    "readOnlyHint": False, "destructiveHint": False,
-    "idempotentHint": False, "openWorldHint": False,
-})
-def render_all_rooms(map_path: str = "", source: Literal["mod", "vanilla"] = "mod") -> dict:
+@mcp.tool(
+    annotations={
+        "readOnlyHint": False,
+        "destructiveHint": False,
+        "idempotentHint": False,
+        "openWorldHint": False,
+    }
+)
+def render_all_rooms(
+    map_path: str = "", source: Literal["mod", "vanilla"] = "mod"
+) -> dict:
     """Generate all room PNGs, an overview, and a browsable room gallery.
 
     Reads source maps only. Writes uniquely named previews outside Celeste.
     Returns every room's path/hash, a standalone gallery, and a compact inline
     visualization reference when it fits. Room browsing makes no further calls.
     """
-    return render_room_gallery(Path(os.environ["LOENN_MCP_WORKSPACE"]),
-                               Path(os.environ["CELESTE_VIEWER_OUTPUT"]), map_path, source)
+    return render_room_gallery(
+        Path(os.environ["LOENN_MCP_WORKSPACE"]),
+        Path(os.environ["CELESTE_VIEWER_OUTPUT"]),
+        map_path,
+        source,
+    )
 
 
-@mcp.tool(annotations={
-    "readOnlyHint": True, "destructiveHint": False,
-    "idempotentHint": True, "openWorldHint": False,
-})
+@mcp.tool(
+    annotations={
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": False,
+    }
+)
 def inspect_gameplay_map(
-    map_path: str = "", source: Literal["mod", "vanilla"] = "mod",
+    map_path: str = "",
+    source: Literal["mod", "vanilla"] = "mod",
 ) -> dict:
     """Inspect duplicate names/IDs, overlapping rooms, node counts, and bounds.
 
@@ -148,22 +189,37 @@ def inspect_gameplay_map(
     No physics, spawn safety, or playability claim. Reads only; writes nothing.
     Uses the same mod/vanilla path rules as render_map_overview.
     """
-    return inspect_map(Path(os.environ["LOENN_MCP_WORKSPACE"]), map_path, source)
+    return inspect_map(
+        Path(os.environ["LOENN_MCP_WORKSPACE"]), map_path, source
+    )
 
 
-@mcp.resource(RESOURCE_URI, mime_type=RESOURCE_MIME,
-              app={"prefersBorder": False,
-                   "csp": {"connectDomains": [], "resourceDomains": []}})
+@mcp.resource(
+    RESOURCE_URI,
+    mime_type=RESOURCE_MIME,
+    app={
+        "prefersBorder": False,
+        "csp": {"connectDomains": [], "resourceDomains": []},
+    },
+)
 def room_browser_resource() -> str:
     """Shared room browser with no map-specific data or network dependencies."""
     return make_app_resource()
 
 
-@mcp.tool(app={"resourceUri": RESOURCE_URI}, output_schema=RESULT_SCHEMA,
-          annotations={"readOnlyHint": False, "destructiveHint": False,
-                       "idempotentHint": False, "openWorldHint": False})
+@mcp.tool(
+    app={"resourceUri": RESOURCE_URI},
+    output_schema=RESULT_SCHEMA,
+    annotations={
+        "readOnlyHint": False,
+        "destructiveHint": False,
+        "idempotentHint": False,
+        "openWorldHint": False,
+    },
+)
 def render_interactive_map(
-    map_path: str = "", source: Literal["mod", "vanilla"] = "mod",
+    map_path: str = "",
+    source: Literal["mod", "vanilla"] = "mod",
 ) -> ToolResult:
     """Show the whole map and all rooms as an interactive MCP App.
 
@@ -173,8 +229,12 @@ def render_interactive_map(
     without MCP Apps can use the returned inline or standalone gallery.
     Uses the same mod/vanilla input scope as the existing PNG tools.
     """
-    return render_app(Path(os.environ["LOENN_MCP_WORKSPACE"]),
-                      Path(os.environ["CELESTE_VIEWER_OUTPUT"]), map_path, source)
+    return render_app(
+        Path(os.environ["LOENN_MCP_WORKSPACE"]),
+        Path(os.environ["CELESTE_VIEWER_OUTPUT"]),
+        map_path,
+        source,
+    )
 
 
 if __name__ == "__main__":

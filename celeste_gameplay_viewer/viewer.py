@@ -15,38 +15,32 @@ from uuid import uuid4
 
 from loenn_mcp import celeste_bin as cb
 
+from .map_source import resolve_map as resolve_map
+from .serialization import encode_script_json
+
 ASSETS = Path(__file__).parent / "assets"
 VISUAL_ENTITIES = frozenset({"lamp"})
-VISUAL_TRIGGERS = frozenset({
-    "bloomFadeTrigger", "colorGradeTrigger", "lightFadeTrigger",
-})
+VISUAL_TRIGGERS = frozenset(
+    {
+        "bloomFadeTrigger",
+        "colorGradeTrigger",
+        "lightFadeTrigger",
+    }
+)
 GAMEPLAY_TRIGGERS = frozenset({"windAttackTrigger", "windTrigger"})
-SUPPORTED_ENTITIES = frozenset({
-    "player", "strawberry", "spinner", "booster", "refill", "cloud",
-    "moveBlock", "jumpThru", "badelineBoost",
-})
-
-
-def resolve_map(workspace: Path, map_path: str = "") -> Path:
-    """Resolve a .bin inside workspace; infer it only if exactly one exists.
-
-    Raises ValueError for ambiguous maps, traversal, or non-map paths.
-    """
-    workspace = workspace.resolve(strict=True)
-    if not map_path:
-        candidates = sorted((workspace / "Maps").rglob("*.bin"))
-        if len(candidates) != 1:
-            raise ValueError(
-                f"Specify map_path; found {len(candidates)} maps in Maps/."
-            )
-        path = candidates[0].resolve(strict=True)
-    else:
-        path = (workspace / map_path).resolve(strict=True)
-    if not path.is_relative_to(workspace):
-        raise ValueError("Map must be within the configured workspace.")
-    if path.suffix.lower() != ".bin" or not path.is_file():
-        raise ValueError("Map must be an existing .bin file.")
-    return path
+SUPPORTED_ENTITIES = frozenset(
+    {
+        "player",
+        "strawberry",
+        "spinner",
+        "booster",
+        "refill",
+        "cloud",
+        "moveBlock",
+        "jumpThru",
+        "badelineBoost",
+    }
+)
 
 
 def children(element: dict, section_name: str) -> list[dict]:
@@ -78,7 +72,9 @@ def extract_layout(map_data: dict, title: str) -> dict:
         columns = (width + 7) // 8
         row_count = (height + 7) // 8
         if len(rows) > row_count or any(len(row) > columns for row in rows):
-            raise ValueError(f"Tiles exceed room bounds in {room.get('name')}.")
+            raise ValueError(
+                f"Tiles exceed room bounds in {room.get('name')}."
+            )
         rows = [row.ljust(columns, "0") for row in rows]
         rows += ["0" * columns] * (row_count - len(rows))
         entities = []
@@ -89,24 +85,29 @@ def extract_layout(map_data: dict, title: str) -> dict:
                 continue
             if kind not in SUPPORTED_ENTITIES:
                 warnings.add(f"Generic marker for entity: {kind}")
-            entities.append({
-                "id": entity.get("id"), "type": kind,
-                "x": entity.get("x", 0), "y": entity.get("y", 0),
-                "w": entity.get("width", 0),
-                "h": entity.get("height", 0),
-                "red": entity.get("red", False),
-                "twoDash": entity.get("twoDash", False),
-                "direction": entity.get("direction"),
-                "nodes": [
-                    [node.get("x", 0), node.get("y", 0)]
-                    for node in entity.get("__children", [])
-                    if node.get("__name") == "node"
-                ],
-                "properties": {
-                    key: value for key, value in entity.items()
-                    if key not in {"__name", "__children"}
-                },
-            })
+            entities.append(
+                {
+                    "id": entity.get("id"),
+                    "type": kind,
+                    "x": entity.get("x", 0),
+                    "y": entity.get("y", 0),
+                    "w": entity.get("width", 0),
+                    "h": entity.get("height", 0),
+                    "red": entity.get("red", False),
+                    "twoDash": entity.get("twoDash", False),
+                    "direction": entity.get("direction"),
+                    "nodes": [
+                        [node.get("x", 0), node.get("y", 0)]
+                        for node in entity.get("__children", [])
+                        if node.get("__name") == "node"
+                    ],
+                    "properties": {
+                        key: value
+                        for key, value in entity.items()
+                        if key not in {"__name", "__children"}
+                    },
+                }
+            )
         triggers = []
         for trigger in children(room, "triggers"):
             kind = trigger["__name"]
@@ -116,28 +117,45 @@ def extract_layout(map_data: dict, title: str) -> dict:
             known = kind in GAMEPLAY_TRIGGERS
             if not known:
                 warnings.add(f"Trigger classification unverified: {kind}")
-            triggers.append({
-                "id": trigger.get("id"),
-                "type": kind, "x": trigger.get("x", 0),
-                "y": trigger.get("y", 0),
-                "w": trigger.get("width", 0),
-                "h": trigger.get("height", 0), "verified": known,
-                "nodes": [[node.get("x", 0), node.get("y", 0)]
-                          for node in trigger.get("__children", [])
-                          if node.get("__name") == "node"],
-                "properties": {key: value for key, value in trigger.items()
-                               if key not in {"__name", "__children"}},
-            })
-        rooms.append({
-            "name": room.get("name", "Unnamed"),
-            "x": room.get("x", 0), "y": room.get("y", 0),
-            "w": width, "h": height, "tiles": rows,
-            "entities": entities, "triggers": triggers,
-        })
+            triggers.append(
+                {
+                    "id": trigger.get("id"),
+                    "type": kind,
+                    "x": trigger.get("x", 0),
+                    "y": trigger.get("y", 0),
+                    "w": trigger.get("width", 0),
+                    "h": trigger.get("height", 0),
+                    "verified": known,
+                    "nodes": [
+                        [node.get("x", 0), node.get("y", 0)]
+                        for node in trigger.get("__children", [])
+                        if node.get("__name") == "node"
+                    ],
+                    "properties": {
+                        key: value
+                        for key, value in trigger.items()
+                        if key not in {"__name", "__children"}
+                    },
+                }
+            )
+        rooms.append(
+            {
+                "name": room.get("name", "Unnamed"),
+                "x": room.get("x", 0),
+                "y": room.get("y", 0),
+                "w": width,
+                "h": height,
+                "tiles": rows,
+                "entities": entities,
+                "triggers": triggers,
+            }
+        )
     if not rooms:
         raise ValueError("The map has no rooms.")
     return {
-        "title": title, "rooms": rooms, "warnings": sorted(warnings),
+        "title": title,
+        "rooms": rooms,
+        "warnings": sorted(warnings),
         "excluded_entities": dict(excluded_entities),
         "excluded_triggers": dict(excluded_triggers),
     }
@@ -145,11 +163,7 @@ def extract_layout(map_data: dict, title: str) -> dict:
 
 def make_fragment(layout: dict, instance_id: str) -> str:
     """Embed map data safely into the local, self-contained HTML template."""
-    payload = json.dumps(layout, ensure_ascii=True, separators=(",", ":"))
-    # HTML parsers recognize closing script tags even inside JavaScript strings.
-    payload = payload.replace("<", "\\u003c").replace(
-        ">", "\\u003e"
-    ).replace("&", "\\u0026")
+    payload = encode_script_json(layout)
     template = (ASSETS / "layout.html").read_text(encoding="utf-8")
     template = template.replace("__INSTANCE__", instance_id)
     fragment = template.replace("__GAMEPLAY_DATA__", payload)
@@ -192,19 +206,26 @@ def render_map(workspace: Path, output_dir: Path, map_path: str = "") -> dict:
             stream.write(content)
         result[key] = destination.as_posix()
     counts = Counter(
-        entity["type"] for room in layout["rooms"]
+        entity["type"]
+        for room in layout["rooms"]
         for entity in room["entities"]
     )
-    result.update({
-        "source": source.as_posix(), "source_sha256": digest_before,
-        "room_count": len(layout["rooms"]), "entities": dict(counts),
-        "trigger_count": sum(len(room["triggers"]) for room in layout["rooms"]),
-        "warnings": layout["warnings"],
-        "note": "Positions and solid tiles are exact; object symbols are schematic, not collision hitboxes.",
-        "visualization": "visualize" + json.dumps({
-            "path": result["fragment_path"]
-        }) + "",
-    })
+    result.update(
+        {
+            "source": source.as_posix(),
+            "source_sha256": digest_before,
+            "room_count": len(layout["rooms"]),
+            "entities": dict(counts),
+            "trigger_count": sum(
+                len(room["triggers"]) for room in layout["rooms"]
+            ),
+            "warnings": layout["warnings"],
+            "note": "Positions and solid tiles are exact; object symbols are schematic, not collision hitboxes.",
+            "visualization": "visualize"
+            + json.dumps({"path": result["fragment_path"]})
+            + "",
+        }
+    )
     return result
 
 
@@ -212,13 +233,21 @@ def main() -> None:
     """Parse command-line paths, render the map, and print a JSON result."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("map_path", nargs="?", default="")
-    parser.add_argument("--workspace", default=os.environ.get("LOENN_MCP_WORKSPACE"))
-    parser.add_argument("--output-dir", default=os.environ.get("CELESTE_VIEWER_OUTPUT"))
+    parser.add_argument(
+        "--workspace", default=os.environ.get("LOENN_MCP_WORKSPACE")
+    )
+    parser.add_argument(
+        "--output-dir", default=os.environ.get("CELESTE_VIEWER_OUTPUT")
+    )
     args = parser.parse_args()
     if not args.workspace or not args.output_dir:
-        parser.error("Set --workspace and --output-dir, or their environment variables.")
+        parser.error(
+            "Set --workspace and --output-dir, or their environment variables."
+        )
     try:
-        result = render_map(Path(args.workspace), Path(args.output_dir), args.map_path)
+        result = render_map(
+            Path(args.workspace), Path(args.output_dir), args.map_path
+        )
     except (ValueError, OSError, RuntimeError) as error:
         parser.exit(1, f"Render failed: {error}\n")
     print(json.dumps(result, indent=2, ensure_ascii=False))

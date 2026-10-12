@@ -14,28 +14,36 @@ window.addEventListener('load', async () => {
   const saved = room => ({modelContent: {room}, privateContent: null});
   const tick = () => new Promise(resolve => setTimeout(resolve, 20));
 
-  check(selectedName() === 'lvl_12', 'Restore saved room on initial load');
-  update({widgetState: saved('lvl_7zb')});
-  check(selectedName() === 'lvl_7zb', 'Allow delayed initial hydration');
+  const {initialRoom, delayedRoom} = window.galleryTestSettings;
+  check(selectedName() === initialRoom, 'Restore saved room on initial load');
+  update({widgetState: saved(delayedRoom)});
+  check(selectedName() === delayedRoom, 'Allow delayed initial hydration');
   const buttons = [...document.querySelectorAll('[data-region]')];
-  for (const button of buttons) {
-    overview.click();
-    button.click();
-    const room = button.dataset.region;
-    check(selectedName() === room, `Click opens ${room}`);
-    await image.decode();
-    // Resize updates can carry a valid but older navigation snapshot.
-    await tick();
-    update({maxHeight: 500, widgetState: saved('Whole map')});
-    check(selectedName() === room, `Resize snapshot preserves ${room}`);
-    update({theme: 'dark'});
-    update({widgetState: null});
-    update({widgetState: saved('missing-room')});
-    update({widgetState: saved('lvl_12')});
-    check(selectedName() === room, `Delayed state preserves ${room}`);
-    check(image.alt === `Gameplay layout of ${room}`, `Image stays on ${room}`);
-    check(document.activeElement === overview, `Picker stays unfocused: ${room}`);
+  for (const mode of ['promise', 'sync', 'reject', 'throw', 'absent']) {
+    window.testSaveMode = mode;
+    if (mode === 'absent') delete window.openai.setWidgetState;
+    else window.openai.setWidgetState = window.testSaveState;
+    for (const button of buttons) {
+      overview.click();
+      button.click();
+      const room = button.dataset.region;
+      check(selectedName() === room, `Click opens ${room}`);
+      await image.decode();
+      // Resize updates can carry a valid but older navigation snapshot.
+      await tick();
+      update({maxHeight: 500, widgetState: saved('Whole map')});
+      check(selectedName() === room, `Resize snapshot preserves ${room}`);
+      update({theme: 'dark'});
+      update({widgetState: null});
+      update({widgetState: saved('missing-room')});
+      update({widgetState: saved(initialRoom)});
+      check(selectedName() === room, `Delayed state preserves ${room}`);
+      check(image.alt === `Gameplay layout of ${room}`, `Image stays on ${room}`);
+      check(document.activeElement === overview, `Picker stays unfocused: ${room}`);
+    }
   }
+  window.testSaveMode = 'sync';
+  window.openai.setWidgetState = window.testSaveState;
 
   overview.click();
   check(selectedName() === 'Whole map', 'Explicit Whole map still works');
@@ -44,7 +52,7 @@ window.addEventListener('load', async () => {
   document.querySelector('[data-next]').click();
   const latest = selectedName();
   update({widgetState: saved('Whole map')});
-  update({widgetState: saved('lvl_1')});
+  update({widgetState: saved(initialRoom)});
   check(selectedName() === latest, 'Out-of-order echoes keep latest selection');
   document.querySelector('[data-previous]').click();
   check(select.value === '1', 'Previous still works');
@@ -53,7 +61,12 @@ window.addEventListener('load', async () => {
 
   overview.click();
   await image.decode();
+  check(window.testErrors.length === 0, 'No uncaught errors');
   document.body.dataset.stateCheck = failures.length ? 'failed' : 'passed';
   document.body.dataset.roomsChecked = String(buttons.length);
   document.body.dataset.failures = JSON.stringify(failures);
+  const result = document.createElement('pre');
+  result.id = 'regression-result';
+  result.textContent = JSON.stringify({failures, errors: window.testErrors}, null, 2);
+  document.body.prepend(result);
 });

@@ -94,9 +94,10 @@ New-Item -ItemType Directory -Path $installedPackage, `
 # Copy an explicit allowlist so a local checkout cannot install upstream code
 # or previously extracted game artwork by accident.
 $pythonFiles = @(
-    '__init__.py', 'findings.py', 'mcp_app.py', 'overview.py',
+    '__init__.py', 'findings.py', 'gallery_data.py', 'map_geometry.py',
+    'map_source.py', 'mcp_app.py', 'overview.py', 'render_style.py',
     'progression.py', 'raster.py',
-    'room_gallery.py', 'room_view.py', 'server.py', 'sprites.py',
+    'room_gallery.py', 'room_view.py', 'serialization.py', 'server.py', 'sprites.py',
     'transport_probe.py', 'viewer.py'
 )
 foreach ($name in $pythonFiles) {
@@ -111,8 +112,8 @@ Copy-Item -LiteralPath (Join-Path $sourceRoot 'tools\extract_sprites.py') `
     -Destination (Join-Path $installRoot 'tools\extract_sprites.py') -Force
 Copy-Item -LiteralPath (Join-Path $sourceRoot 'tools\verify_install.py') `
     -Destination (Join-Path $installRoot 'tools\verify_install.py') -Force
-foreach ($name in @('layout.html', 'mcp-app-bridge.js', 'room-gallery.html',
-                    'standalone.html')) {
+foreach ($name in @('gallery-shell.html', 'layout.html', 'mcp-app-bridge.js',
+                    'room-gallery.html', 'room-gallery.js', 'standalone.html')) {
     Copy-Item -LiteralPath (Join-Path $packageRoot ('assets\' + $name)) `
         -Destination (Join-Path $installedPackage 'assets' $name) -Force
 }

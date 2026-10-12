@@ -65,6 +65,11 @@ test. For a local test without changing Codex configuration, pass
 
 ## Development
 
+See the [architecture and maintenance guide](docs/architecture.md) for module
+ownership, browser contracts, naming conventions, and the maintained dependency
+diagram. Python formatting and lint configuration live in `pyproject.toml`;
+development-only tools are listed in `requirements-dev.txt`.
+
 ### Inferred room progression
 
 `progression.py` uses the same geometry and spawn algorithm for every map.

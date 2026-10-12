@@ -9,22 +9,60 @@ from celeste_gameplay_viewer import viewer
 
 
 def make_map(tiles="\n1"):
-    return {"__children": [{"__name": "levels", "__children": [{
-        "__name": "level", "name": "test", "x": -80, "y": 32,
-        "width": 16, "height": 24, "__children": [
-            {"__name": "solids", "innerText": tiles},
-            {"__name": "entities", "__children": [
-                {"__name": "lamp"},
-                {"__name": "Custom/unknown", "x": 4, "y": 8,
-                 "__children": [{"__name": "node", "x": 32, "y": 48}]},
-            ]},
-            {"__name": "triggers", "__children": [
-                {"__name": "colorGradeTrigger"},
-                {"__name": "windAttackTrigger", "width": 8, "height": 8},
-                {"__name": "Custom/unknownTrigger", "width": 8, "height": 8},
-            ]},
-        ],
-    }]}]}
+    return {
+        "__children": [
+            {
+                "__name": "levels",
+                "__children": [
+                    {
+                        "__name": "level",
+                        "name": "test",
+                        "x": -80,
+                        "y": 32,
+                        "width": 16,
+                        "height": 24,
+                        "__children": [
+                            {"__name": "solids", "innerText": tiles},
+                            {
+                                "__name": "entities",
+                                "__children": [
+                                    {"__name": "lamp"},
+                                    {
+                                        "__name": "Custom/unknown",
+                                        "x": 4,
+                                        "y": 8,
+                                        "__children": [
+                                            {
+                                                "__name": "node",
+                                                "x": 32,
+                                                "y": 48,
+                                            }
+                                        ],
+                                    },
+                                ],
+                            },
+                            {
+                                "__name": "triggers",
+                                "__children": [
+                                    {"__name": "colorGradeTrigger"},
+                                    {
+                                        "__name": "windAttackTrigger",
+                                        "width": 8,
+                                        "height": 8,
+                                    },
+                                    {
+                                        "__name": "Custom/unknownTrigger",
+                                        "width": 8,
+                                        "height": 8,
+                                    },
+                                ],
+                            },
+                        ],
+                    }
+                ],
+            }
+        ]
+    }
 
 
 class ViewerTests(unittest.TestCase):
@@ -46,12 +84,16 @@ class ViewerTests(unittest.TestCase):
         room = layout["rooms"][0]
         self.assertEqual(len(room["entities"]), 1)
         self.assertEqual(room["entities"][0]["nodes"], [[32, 48]])
-        self.assertEqual([t["verified"] for t in room["triggers"]], [True, False])
+        self.assertEqual(
+            [t["verified"] for t in room["triggers"]], [True, False]
+        )
         self.assertEqual(len(layout["warnings"]), 2)
         self.assertEqual(layout["excluded_entities"], {"lamp": 1})
 
     def test_script_like_names_cannot_escape_embedded_json(self):
-        layout = viewer.extract_layout(make_map(), "</script><script>alert(1)</script>")
+        layout = viewer.extract_layout(
+            make_map(), "</script><script>alert(1)</script>"
+        )
         fragment = viewer.make_fragment(layout, "testid")
         self.assertNotIn("</script><script>alert(1)", fragment)
         self.assertIn("\\u003c/script\\u003e", fragment)

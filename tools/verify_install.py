@@ -30,10 +30,16 @@ async def verify() -> None:
     async with Client(transport, timeout=120) as client:
         tools = await client.list_tools()
         names = {tool.name for tool in tools}
-        required = {"render_map_overview", "render_room_preview",
-                    "render_interactive_map", "inspect_gameplay_map"}
+        required = {
+            "render_map_overview",
+            "render_room_preview",
+            "render_interactive_map",
+            "inspect_gameplay_map",
+        }
         if not required <= names:
-            raise RuntimeError(f"Missing viewer tools: {sorted(required - names)}")
+            raise RuntimeError(
+                f"Missing viewer tools: {sorted(required - names)}"
+            )
         browser_uri = "ui://celeste/room-browser-v2.html"
         resources = await client.list_resources()
         if browser_uri not in {str(resource.uri) for resource in resources}:
@@ -47,14 +53,20 @@ async def verify() -> None:
             raise RuntimeError("The read-only PNG preview failed.")
         await client.read_resource(browser_uri)
     if hashlib.sha256(map_file.read_bytes()).hexdigest() != source_hash:
-        raise RuntimeError("The source map changed during read-only verification.")
-    print(json.dumps({
-        "status": "passed",
-        "tool_count": len(tools),
-        "map": relative_map,
-        "browser_resource": browser_uri,
-        "source_sha256": source_hash,
-    }))
+        raise RuntimeError(
+            "The source map changed during read-only verification."
+        )
+    print(
+        json.dumps(
+            {
+                "status": "passed",
+                "tool_count": len(tools),
+                "map": relative_map,
+                "browser_resource": browser_uri,
+                "source_sha256": source_hash,
+            }
+        )
+    )
 
 
 if __name__ == "__main__":

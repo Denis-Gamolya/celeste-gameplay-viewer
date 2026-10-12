@@ -30,15 +30,27 @@ def spike_sprites(entity: dict):
     if image is None:
         return []
     offset_x, offset_y, justify_x, justify_y = {
-        "up": (4, 1, .5, 1), "down": (4, -1, .5, 0),
-        "left": (1, 4, 1, .5), "right": (-1, 4, 0, .5),
+        "up": (4, 1, 0.5, 1),
+        "down": (4, -1, 0.5, 0),
+        "left": (1, 4, 1, 0.5),
+        "right": (-1, 4, 0, 0.5),
     }[direction]
     vertical = direction in {"left", "right"}
     length = entity["h" if vertical else "w"] or 8
-    return [(image,
-             entity["x"]+offset_x-image.width*justify_x+(0 if vertical else step),
-             entity["y"]+offset_y-image.height*justify_y+(step if vertical else 0))
-            for step in range(0, int(length), 8)]
+    return [
+        (
+            image,
+            entity["x"]
+            + offset_x
+            - image.width * justify_x
+            + (0 if vertical else step),
+            entity["y"]
+            + offset_y
+            - image.height * justify_y
+            + (step if vertical else 0),
+        )
+        for step in range(0, int(length), 8)
+    ]
 
 
 def object_sprite(entity: dict):
@@ -58,17 +70,37 @@ def object_sprite(entity: dict):
         "wallSpringRight": "objects/spring/00",
     }.get(kind)
     if kind == "strawberry":
-        texture = "collectables/strawberry/wings01" if props.get("winged") else "collectables/strawberry/normal00"
+        texture = (
+            "collectables/strawberry/wings01"
+            if props.get("winged")
+            else "collectables/strawberry/normal00"
+        )
         if props.get("moon"):
             texture = "collectables/moonBerry/normal00"
     elif kind == "goldenBerry":
-        texture = "collectables/goldberry/wings01" if props.get("winged") else "collectables/goldberry/idle00"
+        texture = (
+            "collectables/goldberry/wings01"
+            if props.get("winged")
+            else "collectables/goldberry/idle00"
+        )
     elif kind == "refill":
-        texture = "objects/refillTwo/idle00" if entity.get("twoDash") else "objects/refill/idle00"
+        texture = (
+            "objects/refillTwo/idle00"
+            if entity.get("twoDash")
+            else "objects/refill/idle00"
+        )
     elif kind == "booster":
-        texture = "objects/booster/boosterRed00" if entity.get("red") else "objects/booster/booster00"
+        texture = (
+            "objects/booster/boosterRed00"
+            if entity.get("red")
+            else "objects/booster/booster00"
+        )
     elif kind == "cloud" and not props.get("small"):
-        texture = "objects/clouds/fragile00" if props.get("fragile") else "objects/clouds/cloud00"
+        texture = (
+            "objects/clouds/fragile00"
+            if props.get("fragile")
+            else "objects/clouds/cloud00"
+        )
     elif kind == "spinner" and not props.get("dust"):
         color = props.get("color", "Blue").lower()
         texture = f"danger/crystal/fg_{color}00"
@@ -79,11 +111,11 @@ def object_sprite(entity: dict):
         return None
     x, y = entity["x"], entity["y"]
     if kind == "spring":
-        return sprite, x-sprite.width/2, y-sprite.height
+        return sprite, x - sprite.width / 2, y - sprite.height
     if kind == "wallSpringLeft":
         sprite = sprite.transpose(Image.Transpose.ROTATE_270)
-        return sprite, x, y-sprite.height/2
+        return sprite, x, y - sprite.height / 2
     if kind == "wallSpringRight":
         sprite = sprite.transpose(Image.Transpose.ROTATE_90)
-        return sprite, x-sprite.width, y-sprite.height/2
-    return sprite, x-sprite.width/2, y-sprite.height/2
+        return sprite, x - sprite.width, y - sprite.height / 2
+    return sprite, x - sprite.width / 2, y - sprite.height / 2
