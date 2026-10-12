@@ -205,7 +205,9 @@ def browse_tree(tree: BrowsingTree, name_keys: list[tuple]) -> list[int]:
     # Positive path costs put children after parents. Count backwards and
     # traverse iteratively so long custom maps do not hit a recursion limit.
     subtree_sizes = {index: 1 for index in tree.distances}
-    for index in sorted(tree.distances, key=tree.distances.get, reverse=True):
+    for index in sorted(
+        tree.distances, key=tree.distances.__getitem__, reverse=True
+    ):
         if index in tree.parents:
             subtree_sizes[tree.parents[index]] += subtree_sizes[index]
     ordered = []

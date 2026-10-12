@@ -55,7 +55,7 @@ class RasterCanvas:
     def textbbox(self, position, text, **kwargs):
         return self.metrics.textbbox(position, text, **kwargs)
 
-    def sprite(self, image, position, scale=1):
+    def sprite(self, image, position, scale: float = 1):
         """Composite RGBA pixel art at logical top-left using nearest sampling."""
         size = tuple(
             max(1, round(value * scale * self.factor)) for value in image.size

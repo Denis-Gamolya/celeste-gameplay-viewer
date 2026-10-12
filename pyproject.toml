@@ -8,3 +8,10 @@ target-version = "py310"
 
 [tool.ruff.lint]
 select = ["E4", "E7", "E9", "F", "I"]
+
+[tool.pyright]
+include = ["celeste_gameplay_viewer", "tools", "tests", "run_server.py"]
+venvPath = "."
+venv = ".venv"
+pythonVersion = "3.10"
+typeCheckingMode = "basic"

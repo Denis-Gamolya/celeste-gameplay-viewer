@@ -226,9 +226,11 @@ class RoomViewTests(unittest.TestCase):
         with Image.open(BytesIO(png)) as picture:
             # Inspect only the room plot, excluding the berry-colored legend.
             colors = picture.crop((72, 228, 1400, 900)).getcolors(1_000_000)
+            assert colors is not None
             self.assertTrue(
                 any(
-                    color[0] > 180
+                    isinstance(color, tuple)
+                    and color[0] > 180
                     and color[1] < 100
                     and color[2] < 130
                     and count > 100

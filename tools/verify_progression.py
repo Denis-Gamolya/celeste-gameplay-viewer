@@ -40,10 +40,10 @@ class PublishedRoomLinks(HTMLParser):
         self.prefix = urlparse(page_url).path.rstrip("/") + "/"
         self.rooms = []
 
-    def handle_starttag(self, tag, attributes):
+    def handle_starttag(self, tag, attrs):
         if tag != "a":
             return
-        href = dict(attributes).get("href", "")
+        href = dict(attrs).get("href", "") or ""
         parsed = urlparse(href)
         if not parsed.path.startswith(self.prefix):
             return

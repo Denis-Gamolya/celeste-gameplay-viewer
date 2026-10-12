@@ -5,6 +5,7 @@ import unittest
 from io import BytesIO
 
 from fastmcp import Client
+from mcp.types import ImageContent, TextContent
 from PIL import Image
 
 from celeste_gameplay_viewer.server import mcp
@@ -17,8 +18,11 @@ class ProbeTests(unittest.TestCase):
         self.assertEqual(
             [item.type for item in result.content], ["text", "image"]
         )
-        self.assertIn("P1-CELESTE", result.content[0].text)
+        text_block = result.content[0]
+        assert isinstance(text_block, TextContent)
+        self.assertIn("P1-CELESTE", text_block.text)
         block = result.content[1]
+        assert isinstance(block, ImageContent)
         self.assertEqual(block.mimeType, "image/png")
         raw = base64.b64decode(block.data, validate=True)
         self.assertLess(len(raw), 20_000)
@@ -38,6 +42,7 @@ class ProbeProtocolTests(unittest.IsolatedAsyncioTestCase):
             tool = next(
                 item for item in catalog if item.name == "test_image_delivery"
             )
+            assert tool.annotations is not None
             self.assertTrue(tool.annotations.readOnlyHint)
             result = await client.call_tool("test_image_delivery", {})
             self.assertEqual(

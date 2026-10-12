@@ -70,6 +70,22 @@ ownership, browser contracts, naming conventions, and the maintained dependency
 diagram. Python formatting and lint configuration live in `pyproject.toml`;
 development-only tools are listed in `requirements-dev.txt`.
 
+Set up the checkout's environment before checking code:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt -r requirements-dev.txt
+.\.venv\Scripts\python.exe -m pyright
+.\.venv\Scripts\python.exe -m ruff check .
+.\.venv\Scripts\python.exe -m unittest discover -s tests
+```
+
+In VS Code, use **Python: Select Interpreter** to select
+`.venv\Scripts\python.exe`. The installed MCP server has its own environment;
+its dependencies do not automatically become available in this checkout.
+Pyright checks runtime modules, development tools, and tests using the local
+environment configured in `pyproject.toml`.
+
 ### Inferred room progression
 
 `progression.py` uses the same geometry and spawn algorithm for every map.
@@ -212,4 +228,4 @@ and preserves a backup before changing that file.
   previews. Those PNGs are not part of this repository or its MIT license.
 
 This project is an independent fan-made tool and is not affiliated with
-Extremely OK Games, the Celeste team, Lönn, or Maggy Studio.
+Extremely OK Games, the Celeste team, or Lönn

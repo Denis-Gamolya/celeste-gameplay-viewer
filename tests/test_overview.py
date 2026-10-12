@@ -7,6 +7,7 @@ from io import BytesIO
 from pathlib import Path
 from unittest.mock import patch
 
+from mcp.types import ImageContent
 from PIL import Image
 
 from celeste_gameplay_viewer.overview import (
@@ -225,8 +226,10 @@ class OverviewTests(unittest.TestCase):
             self.assertEqual(
                 [block.type for block in result.content], ["text", "image"]
             )
+            image_block = result.content[1]
+            assert isinstance(image_block, ImageContent)
             self.assertTrue(
-                base64.b64decode(result.content[1].data).startswith(
+                base64.b64decode(image_block.data).startswith(
                     b"\x89PNG\r\n\x1a\n"
                 )
             )

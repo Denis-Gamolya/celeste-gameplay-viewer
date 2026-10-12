@@ -76,7 +76,9 @@ Short `x`/`y` names are reserved for local coordinate calculations.
 
 [Black](https://black.readthedocs.io/en/stable/the_black_code_style/current_style.html)
 formats Python to 79 columns. Ruff checks imports, unused/undefined names, and
-basic syntax/style errors. Both are development-only dependencies recorded in
+basic syntax/style errors. Pyright checks types and protocol response variants
+against the checkout's `.venv`, including development tools and tests.
+All three are development-only dependencies recorded in
 `requirements-dev.txt` and configured in `pyproject.toml`.
 The existing flat package is retained; the [Flask package](https://github.com/pallets/flask/tree/main/src/flask)
 is a mature reference for explicit module responsibilities, not a framework

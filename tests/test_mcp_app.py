@@ -7,6 +7,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from fastmcp import Client
+from mcp.types import TextContent, TextResourceContents
 
 from celeste_gameplay_viewer.mcp_app import (
     RESOURCE_MIME,
@@ -50,10 +51,13 @@ class AppTests(unittest.TestCase):
                 result = render_interactive_map(
                     Path(temporary), Path(temporary)
                 )
+            assert result.meta is not None
             self.assertEqual(result.meta["celesteGallery"], payload)
             self.assertEqual(result.structured_content, manifest)
             self.assertNotIn("base64", json.dumps(result.structured_content))
-            self.assertNotIn("base64", result.content[0].text)
+            text_block = result.content[0]
+            assert isinstance(text_block, TextContent)
+            self.assertNotIn("base64", text_block.text)
 
 
 class AppProtocolTests(unittest.IsolatedAsyncioTestCase):
@@ -63,6 +67,7 @@ class AppProtocolTests(unittest.IsolatedAsyncioTestCase):
             tool = next(
                 item for item in tools if item.name == "render_interactive_map"
             )
+            assert tool.meta is not None
             self.assertEqual(tool.meta["ui"]["resourceUri"], RESOURCE_URI)
             resources = await client.list_resources()
             resource = next(
@@ -70,6 +75,8 @@ class AppProtocolTests(unittest.IsolatedAsyncioTestCase):
             )
             self.assertEqual(resource.mimeType, RESOURCE_MIME)
             contents = await client.read_resource(RESOURCE_URI)
+            assert isinstance(contents[0], TextResourceContents)
+            assert contents[0].meta is not None
             self.assertEqual(contents[0].mimeType, RESOURCE_MIME)
             self.assertEqual(
                 contents[0].meta["ui"]["csp"]["connectDomains"], []

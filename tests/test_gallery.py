@@ -43,7 +43,9 @@ class GalleryTests(unittest.TestCase):
         )
 
     def test_sprites_keep_original_size_and_spike_anchor(self):
-        image, x, y = object_sprite({"type": "refill", "x": 80, "y": 40})
+        sprite = object_sprite({"type": "refill", "x": 80, "y": 40})
+        assert sprite is not None
+        image, x, y = sprite
         self.assertEqual((image.size, x, y), ((16, 16), 72, 32))
         sprites = spike_sprites(
             {"type": "spikesUp", "x": 32, "y": 48, "w": 16, "h": 0}

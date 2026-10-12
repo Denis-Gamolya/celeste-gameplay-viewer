@@ -185,7 +185,7 @@ class RoomDrawing:
             self.plot_top + (y - self.top) * self.scale,
         )
 
-    def draw_line(self, points, color, width=1):
+    def draw_line(self, points, color, width: float = 1):
         """Draw a path in local game-pixel coordinates."""
         self.canvas.line(
             [self.to_image_point(x, y) for x, y in points],
@@ -193,7 +193,9 @@ class RoomDrawing:
             width=width,
         )
 
-    def draw_box(self, x, y, width, height, fill=None, outline=None, stroke=1):
+    def draw_box(
+        self, x, y, width, height, fill=None, outline=None, stroke: float = 1
+    ):
         """Draw a rectangular object in local game pixels."""
         self.canvas.rectangle(
             [
@@ -334,7 +336,7 @@ class RoomDrawing:
                     "Right": (8, 0),
                     "Up": (0, -8),
                     "Down": (0, 8),
-                }.get(entity.get("direction"), (0, 0))
+                }.get(entity.get("direction") or "", (0, 0))
                 if direction_x or direction_y:
                     self.draw_arrow(
                         x + width / 2,
