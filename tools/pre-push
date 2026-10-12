@@ -1,0 +1,3 @@
+#!/bin/sh
+# Git for Windows runs hooks in its bundled shell.
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools/check_repository.ps1

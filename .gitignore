@@ -1,10 +1,51 @@
+# Local Python environments and dependency copies.
 .venv/
+venv/
+env/
 .install-test/
 __pycache__/
 *.py[cod]
-celeste_gameplay_viewer/assets/sprites/*.png
-celeste_gameplay_viewer/assets/sprites/manifest.json
+*.egg-info/
+
+# Generated map browsers, snapshots, renders, and build output.
 outputs/
 previews/
+build/
 dist/
+*.log
+
+# Celeste maps and extracted game artwork belong on the user's machine.
+*.bin
+*.data
+celeste_gameplay_viewer/assets/sprites/*
+!celeste_gameplay_viewer/assets/sprites/README.md
+assets/sprites/*
+!assets/sprites/README.md
+
+# Test, formatter, linter, and coverage caches.
 .pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Machine-specific configuration and credentials. Examples may be shared.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.json
+.codex/
+.idea/
+.vscode/
+
+# Operating-system and editor temporary files.
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.swp
+*.swo
+*~

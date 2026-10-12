@@ -1,0 +1,2 @@
+# Git's shell hooks need Unix line endings, including on Windows.
+tools/pre-push text eol=lf
