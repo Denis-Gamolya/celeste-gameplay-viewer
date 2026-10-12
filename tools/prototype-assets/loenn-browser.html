@@ -1,0 +1,62 @@
+<div id="__INSTANCE__" data-view="map">
+  <div class="text-small">Celeste room browser · prototype</div>
+  <div class="text-small text-muted">Map: loenn-mcp by Maggy Studio · Room images: Celeste Gameplay Viewer</div>
+  <div data-prototype-panels>
+    <div data-loenn-panel>
+      <iframe data-loenn-frame title="Loenn whole-map navigation" sandbox="allow-scripts"></iframe>
+    </div>
+    <div data-room-panel hidden>
+      __GALLERY__
+    </div>
+  </div>
+  <style>
+    #__INSTANCE__ [data-prototype-panels] {display:grid;grid-template-columns:minmax(0,1fr);}
+    #__INSTANCE__ [data-prototype-panels] > div {grid-area:1/1;min-width:0;}
+    #__INSTANCE__ [data-loenn-frame] {display:block;width:100%;height:600px;border:0;margin-top:8px;}
+    #__INSTANCE__ [data-room-panel][hidden] {display:none;}
+    #__INSTANCE__ [data-room-panel] {background:var(--background,#101216);}
+  </style>
+</div>
+<script>
+(() => {
+  const root = document.getElementById('__INSTANCE__');
+  const channel = __CHANNEL__;
+  const frame = root.querySelector('[data-loenn-frame]');
+  const mapPanel = root.querySelector('[data-loenn-panel]');
+  const roomPanel = root.querySelector('[data-room-panel]');
+  const gallery = root.querySelector('#__INSTANCE__-rooms');
+  const select = gallery.querySelector('[data-room]');
+  const back = gallery.querySelector('[data-overview]');
+  const pageByName = new Map([...select.options].map(option => [option.textContent, option.value]));
+
+  function synchronizePanels() {
+    const isMap = select.value === '0';
+    // Visibility preserves the iframe dimensions, zoom, search, and pan.
+    // Recreating its document or using display:none would refit the map.
+    mapPanel.style.visibility = isMap ? '' : 'hidden';
+    mapPanel.inert = !isMap;
+    mapPanel.setAttribute('aria-hidden', String(!isMap));
+    roomPanel.hidden = isMap;
+    root.dataset.view = isMap ? 'map' : 'room';
+  }
+  for (const selector of ['[data-overview]', '[data-previous]', '[data-next]']) {
+    gallery.querySelector(selector).addEventListener('click', synchronizePanels);
+  }
+  select.addEventListener('change', synchronizePanels);
+  window.addEventListener('message', event => {
+    const message = event.data;
+    if (event.source !== frame.contentWindow || message?.channel !== channel ||
+        message.type !== 'celeste:open-room') return;
+    const page = pageByName.get(message.room);
+    if (!page || page === '0') return;
+    roomPanel.hidden = false;
+    select.value = page;
+    select.dispatchEvent(new Event('change'));
+    synchronizePanels();
+    // Focus the return control, leaving the mobile room selector closed.
+    back.focus({preventScroll: true});
+  });
+  frame.srcdoc = __MAP_DOCUMENT__;
+  synchronizePanels();
+})();
+</script>

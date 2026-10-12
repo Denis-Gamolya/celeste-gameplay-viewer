@@ -65,6 +65,99 @@ test. For a local test without changing Codex configuration, pass
 
 ## Development
 
+### Inferred room progression
+
+`progression.py` uses the same geometry and spawn algorithm for every map.
+It contains no chapter-specific room lists and never loads Berry Camp's orders
+at runtime. Each room appears once, including dummy, cinematic, and credits
+rooms that a community guide may omit.
+
+```text
+Saved room bounds + first spawns
+          │
+          ▼
+Touching-edge candidates ──> start/name hints for each component
+          │
+          ▼
+Spawn-weighted shortest-path tree
+          │
+          ▼
+Small branches before long continuations ──> dropdown / Previous / Next
+
+Berry Camp's independent order lists ──> validation report only
+```
+
+Positive edge costs make the browsing tree cycle-free. Iterative traversal
+avoids a recursion limit on long custom maps. Deterministic natural names break
+ties and organize disconnected rooms. A missing spawn uses the room center.
+The resulting metadata reports component starts, candidate/parent links,
+missing evidence, and limitations. It does not claim a verified playable route;
+scripted transitions and authored branch preferences can differ.
+
+The algorithm uses Python's standard-library [heapq priority queue](https://docs.python.org/3/library/heapq.html).
+[Berry Camp](https://berrycamp.github.io/) supplies independent test references
+for 27 maps across all 11 listed chapters. Tests retain those references under
+`tests/fixtures/`, following the repository's existing `unittest` workflow.
+The [chapter-by-chapter results](docs/progression-validation.md) record exact
+matches separately from pair-order agreement and source-room coverage.
+
+Reproduce the read-only comparison with:
+
+```powershell
+python tools/verify_progression.py `
+  --maps-dir 'D:\SteamLibrary\steamapps\common\Celeste\Content\Maps'
+$env:CELESTE_TEST_MAPS = 'D:\SteamLibrary\steamapps\common\Celeste\Content\Maps'
+python -m unittest discover -s tests -p 'test_*.py' -q
+```
+
+Use `python tools/verify_progression.py --check-site` for an optional network
+check of the pinned fixture against all 27 published chapter-side pages.
+
+The map extractor accepts partial edge tiles because vanilla Resort B-side
+and Summit credits include room dimensions that are not multiples of eight.
+Exact world bounds are preserved; no game files are changed.
+
+### Loenn whole-map connection prototype
+
+Step 1 is a development prototype. It leaves the installed MCP tool and the
+current overview renderer in place. The proposed browsing flow is:
+
+```text
+Source .bin (read only) ──> disposable output snapshot
+                            ├── installed loenn-mcp ──> whole-map HTML
+                            └── viewer room renderer ──> all room images
+
+Loenn room index ──> full saved room name ──> existing room browser
+                                              └── Whole map returns to Loenn
+```
+
+Generate a Forsaken City sample with the viewer's Python environment:
+
+```powershell
+python tools/prototype_loenn_browser.py `
+  --workspace 'D:\SteamLibrary\steamapps\common\Celeste\Mods\YourMod' `
+  --output 'outputs/loenn-prototype' `
+  --map '1-ForsakenCity.bin' --source vanilla
+```
+
+Open the returned `index.html`. It embeds full-resolution lossless room
+images; the smaller fragment is an optional compressed preview. Source hashes
+are checked after rendering. Generated Loenn HTML and map snapshots are under
+ignored `outputs/`; upstream server source is never copied into this repo.
+
+The adapter currently targets the pinned `loenn-mcp==5.2.0`. That version's
+generated HTML initializes the minimap too early; the adapter defers its first
+draw in the generated document only. Room indices are checked against the
+unfiltered source order. The [upstream renderer](https://github.com/Magedeline/loenn-mcp)
+and [MDN iframe documentation](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/iframe)
+informed the isolated `srcdoc` frame and source-checked message bridge. This
+preserves upstream zoom, search, and pan without mixing its styles with the
+room browser. A development browser check is available as
+`node tests/loenn-prototype-check.cjs <index.html> [playwright-module] [browser-executable]`.
+
+This prototype does not yet change the public MCP result format or installer;
+those follow after the preview is accepted.
+
 The repository keeps runtime code together and separates development tools:
 
 ```text
@@ -96,6 +189,10 @@ MCP registrations in `~/.codex/config.toml`; the installer uses `codex mcp add`
 and preserves a backup before changing that file.
 
 ## Credits and third-party components
+
+- [Berry Camp](https://berrycamp.github.io/), by wishcresp and contributors,
+  supplies the independent room-order validation data. Its reference lists are
+  used only in tests and reports, never to override the inference algorithm.
 
 - [`loenn-mcp`](https://github.com/Magedeline/loenn-mcp) by Maggy Studio is a
   separately installed, MIT-licensed PyPI dependency used here to read the

@@ -28,6 +28,15 @@ def make_map(tiles="\n1"):
 
 
 class ViewerTests(unittest.TestCase):
+    def test_partial_edge_tiles_preserve_exact_room_dimensions(self):
+        data = make_map("111\n101\n111")
+        raw_room = data["__children"][0]["__children"][0]
+        raw_room["width"] = 18
+        raw_room["height"] = 22
+        room = viewer.extract_layout(data, "partial tiles")["rooms"][0]
+        self.assertEqual((room["w"], room["h"]), (18, 22))
+        self.assertEqual(room["tiles"], ["111", "101", "111"])
+
     def test_blank_rows_and_trailing_air_keep_their_positions(self):
         layout = viewer.extract_layout(make_map(), "test")
         self.assertEqual(layout["rooms"][0]["tiles"], ["00", "10", "00"])

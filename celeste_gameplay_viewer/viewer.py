@@ -68,13 +68,15 @@ def extract_layout(map_data: dict, title: str) -> dict:
     for room in cb.get_rooms(map_data):
         width = int(room.get("width", 0))
         height = int(room.get("height", 0))
-        if width <= 0 or height <= 0 or width % 8 or height % 8:
+        if width <= 0 or height <= 0:
             raise ValueError(f"Invalid tile dimensions in {room.get('name')}.")
         solids = cb.find_child(room, "solids") or {}
         # Blank rows and omitted trailing air are meaningful in Celeste maps.
         rows = solids.get("innerText", "").splitlines()
-        columns = width // 8
-        row_count = height // 8
+        # Vanilla rooms can end with partial tiles. Keep the actual bounds and
+        # retain the final tile row or column rather than rejecting the room.
+        columns = (width + 7) // 8
+        row_count = (height + 7) // 8
         if len(rows) > row_count or any(len(row) > columns for row in rows):
             raise ValueError(f"Tiles exceed room bounds in {room.get('name')}.")
         rows = [row.ljust(columns, "0") for row in rows]
